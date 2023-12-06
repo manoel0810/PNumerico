@@ -49,7 +49,7 @@
             // 
             // WaitTime
             // 
-            this.WaitTime.Interval = 2000;
+            this.WaitTime.Interval = 5000;
             this.WaitTime.Tick += new System.EventHandler(this.WaitTime_Tick);
             // 
             // SplashScreen

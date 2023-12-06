@@ -1,4 +1,4 @@
-﻿//#define TEST_MODE
+﻿#define TEST_MODE
 
 using PNumerico.Notifications;
 using System;
@@ -94,6 +94,12 @@ namespace PNumerico
             Cursor = Cursors.Default;
         }
 
+
+        /// <summary>
+        /// Método de controle interno para testes
+        /// </summary>
+        /// <returns>Vetor de dimensão n x n + 1, que representa um sistema possível determinado para testes</returns>
+
         private double[,] Test()
         {
             double[,] values = new double[3, 4];
@@ -112,11 +118,21 @@ namespace PNumerico
 
         private bool IsValidInputValue(string value) => double.TryParse(value, out _);
 
+        /// <summary>
+        /// Adiciona à auditoria da classe uma notificação de ocorrência
+        /// </summary>
+        /// <param name="notify">Detalhes da ocorrência</param>
+
         private void AddNotification(Notification notify)
         {
             if (notify != null)
                 _notifications.Add(notify);
         }
+
+        /// <summary>
+        /// Verifica se houve ocorrências de avisos na inicialização do objeto <see cref="MainForm" />
+        /// </summary>
+        /// <returns><b>true</b> quando não há ocorrências</returns>
 
         private bool SuccessInitialization() => _notifications.Count == 0;
     }

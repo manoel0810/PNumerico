@@ -1,6 +1,6 @@
 ﻿namespace PNumerico.PNumerico.Math
 {
-    class Calculate
+    public class Calculate
     {
         public static double[] Gauss(double[,] matrix)
         {
