@@ -47,11 +47,7 @@ namespace PNumerico
             ExecProc.Text = "Calculando...";
             Cursor = Cursors.WaitCursor;
 
-#if TEST_MODE
-            DisplayResult r = new DisplayResult(Test());
-            r.ShowDialog();
-            r?.Dispose();
-#else
+            
             double[,] values = new double[matrix1.MatrixSize, matrix1.MatrixSize + 1];
             foreach (System.Windows.Forms.Control c in matrix1.Controls)
             {
@@ -88,7 +84,7 @@ namespace PNumerico
                 return;
             }
 
-#endif
+
             _notifications.Clear();
             ExecProc.Text = "Calcular";
             Cursor = Cursors.Default;
