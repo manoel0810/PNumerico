@@ -2,7 +2,9 @@
 using System;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace PNumerico
@@ -35,30 +37,68 @@ namespace PNumerico
                 elipsedTime.Stop();
 
                 _elipsed = elipsedTime.ElapsedMilliseconds;
-                DataTable outRestult = new DataTable();
-                outRestult.Columns.Add("Identificador", typeof(string));
-                outRestult.Columns.Add("Valor", typeof(double));
+                DataTable outResult = new DataTable();
+                outResult.Columns.Add("Identificador", typeof(string));
+                outResult.Columns.Add("Valor", typeof(double));
 
-                DataRow row = outRestult.NewRow();
-                int indexe = 1;
+                DataRow row = outResult.NewRow();
+                int index = 1;
                 foreach (var r in results)
                 {
-                    row["Identificador"] = $"X{indexe++}";
+                    row["Identificador"] = $"X{index++}";
                     row["Valor"] = Math.Round(r, 8);
-                    outRestult.Rows.Add(row);
+                    outResult.Rows.Add(row);
 
-                    row = outRestult.NewRow();
+                    row = outResult.NewRow();
                 }
 
-                LoadGrid(outRestult);
+                DetermineSystemType(outResult);
 
+                LoadGrid(outResult);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erro ao executar operações logicas", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Erro ao executar operações lógicas", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 InnerError = ex;
                 return;
             }
+        }
+
+        private void DetermineSystemType(DataTable resultsTable)
+        {
+            
+
+            bool isSystemImpossible = resultsTable.AsEnumerable().Any(row => double.IsInfinity(row.Field<double>("Valor")));
+
+            if (isSystemImpossible)
+            {
+                ElipsedProcessTime.Text = $"{_elipsed}ms\r\nSISTEMA IMPOSSÍVEL";
+                return;
+            }
+
+            bool isSystemLinearSimple = resultsTable.AsEnumerable().All(row => IsInt(row.Field<double>("Valor")));
+
+            if (isSystemLinearSimple)
+            {
+                ElipsedProcessTime.Text = $"{_elipsed}ms\r\nSISTEMA LINEAR SIMPLES";
+            }
+            else
+            {
+                bool isSystemPossibleIndeterminate = resultsTable.AsEnumerable().Any(row => IsFloat(row.Field<double>("Valor")));
+
+                ElipsedProcessTime.Text = $"{_elipsed}ms" +
+                    (isSystemPossibleIndeterminate ? "\r\nSISTEMA POSSÍVEL INDETERMINADO" : "\r\nSISTEMA LINEAR SIMPLES");
+            }
+        }
+
+        private bool IsInt(double value)
+        {
+            return Math.Floor(value) == value;
+        }
+
+        private bool IsFloat(double value)
+        {
+            return !IsInt(value) && !double.IsInfinity(value);
         }
 
         private void LoadGrid(DataTable table)
@@ -68,8 +108,9 @@ namespace PNumerico
 
             ResultsGrid.Columns[0].Width = ptr;
             ResultsGrid.Columns[1].Width = ptr;
+            
 
-            ElipsedProcessTime.Text += $"{_elipsed}ms";
+            //ElipsedProcessTime.Text += $"{_elipsed}ms";
         }
 
         private void Sava_Click(object sender, EventArgs e)
@@ -83,7 +124,7 @@ namespace PNumerico
             {
                 string fileName = $"{Guid.NewGuid().ToString().Substring(0, 8)}.txt";
                 File.WriteAllText(fileName, txt);
-                DialogResult res = MessageBox.Show($"Arquivo salco como: {fileName}.\nAbrir arquivo?", "Salvar", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                DialogResult res = MessageBox.Show($"Arquivo salvo como: {fileName}.\nAbrir arquivo?", "Salvar", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
                 if (res == DialogResult.Yes)
                     Process.Start(fileName);
                 
